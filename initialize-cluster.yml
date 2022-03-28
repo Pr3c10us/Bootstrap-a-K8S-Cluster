@@ -1,0 +1,29 @@
+---
+
+- name: Initialize the cluster and set up kubectl access
+  hosts: master
+  become: yes
+  tasks: 
+
+    - name: Initialize cluster
+      shell: sudo kubeadm init --pod-network-cidr 192.168.0.0/16 --kubernetes-version 1.23.0
+      ignore_errors: yes
+
+    - name: Create a .kube dir
+      become: yes
+      file:
+        path: /home/cloud_user/.kube
+        state: directory
+        mode: 0755
+
+    - name: copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/cloud_user/.kube/config
+        remote_src: yes
+        owner: cloud_user
+    
+    - name: install Pod network
+      become: yes
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+    

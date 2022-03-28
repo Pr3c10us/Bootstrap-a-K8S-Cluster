@@ -1,0 +1,43 @@
+---
+
+- name: Installing Docker
+  hosts: all
+  become: yes
+  vars:
+    docker_packages:
+      - docker-ce 
+      - docker-ce-cli 
+      - containerd.io
+    system_packages:
+      - ca-certificates 
+      - curl 
+      - gnupg 
+      - lsb-release
+  tasks: 
+    
+    - name: Install packages to allow apt to use a repository over HTTPS
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ system_packages }}"
+      ignore_errors: yes
+
+    - name: Get gpg key
+      apt_key:
+        url: "https://download.docker.com/linux/ubuntu/gpg"
+        state: present
+
+    - name: Add docker repository for the docker packages
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes     
+
+    - name: Install Docker Engine
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ docker_packages }}"

@@ -1,0 +1,45 @@
+---
+
+- name: Installing K8S
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Off Swap
+      shell: sudo swapoff -a
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install apt-transport-https 
+      apt: 
+        name: apt-transport-https 
+        state: present
+
+    - name: Add k8s gpg key
+      apt_key:
+        url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+
+    - name: Add k8s repository to system
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install k8s packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        force: yes
+        dpkg_options: force-downgrade
+      loop: 
+        - kubelet=1.23.0-00 
+        - kubeadm=1.23.0-00 
+        - kubectl=1.23.0-00
+
+    - name: Hold packages to avoid auto update
+      shell: sudo apt-mark hold kubelet kubeadm kubectl
