@@ -1,0 +1,7 @@
+---
+- import_playbook: configuring-system.yml
+- import_playbook: installing-docker.yml
+- import_playbook: installing-k8s.yml
+- import_playbook: configuring-kubelet.yml
+- import_playbook: initialize-cluster.yml
+- import_playbook: Setting-up-worker-node.yml
